@@ -1,23 +1,28 @@
 import ast
 import os
+import pathlib
 
 class Extractor:
   def __init__(self):
     pass
   def extract(myfile):
-    scriptname = os.path.basename(__file__)
-    scriptlocation = os.path.realpath(__file__)
     text_extracted=""
     line_of_text=0
     with open(myfile, "r") as code:
       tree = ast.parse(code.read())
-    with open(scriptname+".ts", "w") as info:
+      classes = [node.name for node in walk(tree) if isinstance(node, ast.ClassDef)]
+      path = pathlib.PurePath(os.path.realpath(myfile))
+      package_name = str(path.parent.name)
+      if len(classes)!=0: context_name = package_name+"."+classes[0]
+      else: context_name = myfile[:-3]
+      file_location = os.path.relpath(str(path))
+    with open(context_name+".ts", "w") as info:
       info.write("""
         <?xml version="1.0" encoding="utf-8"?>
         <!DOCTYPE TS>
         <TS version="2.1">
           <context>
-            <name>"""+scriptname[:-3]+"""</name>
+            <name>"""+context_name+"""</name>
       """)
       for node in walk(tree):
         if isinstance(node, ast.Call):
@@ -29,7 +34,7 @@ class Extractor:
                 print(text_extracted, " ligne ", node.lineno)
                 info.write("""
                 <message>
-                    <location filename='"""+scriptlocation+"""' line='"""+str(line_of_text)+"""'/>
+                    <location filename='"""+file_location+"""' line='"""+str(line_of_text)+"""'/>
                     <source>"""+text_extracted+"""</source>
                     <translation type="unfinished">"""+"""</translation>
                 </message>
@@ -41,7 +46,7 @@ class Extractor:
                   print(text_extracted, " ligne ", node.lineno)
                   info.write("""
                   <message>
-                      <location filename='"""+scriptlocation+"""' line='"""+str(line_of_text)+"""'/>
+                      <location filename='"""+file_location+"""' line='"""+str(line_of_text)+"""'/>
                       <source>"""+text_extracted+"""</source>
                       <translation type="unfinished">"""+"""</translation>
                   </message>
@@ -55,7 +60,7 @@ class Extractor:
                 print(text_extracted, " ligne ", node.lineno)
                 info.write("""
                 <message>
-                    <location filename='"""+scriptlocation+"""' line='"""+str(line_of_text)+"""'/>
+                    <location filename='"""+file_location+"""' line='"""+str(line_of_text)+"""'/>
                     <source>"""+text_extracted+"""</source>
                     <translation type="unfinished">"""+"""</translation>
                 </message>
