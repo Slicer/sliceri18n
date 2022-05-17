@@ -612,7 +612,7 @@ class DICOMReferencesDialog(qt.QMessageBox):
     label = qt.QLabel(self.WINDOW_TEXT)
     label.wordWrap = True
     self.layout().addWidget(label, 0, 0, 1, 3)
-
+  print(_("test"))
   def _addLoadableCheckboxes(self):
     self.checkBoxGroupBox = qt.QGroupBox(_("References"))
     self.checkBoxGroupBox.setLayout(qt.QFormLayout())
