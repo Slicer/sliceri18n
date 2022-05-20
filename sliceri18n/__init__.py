@@ -5,9 +5,22 @@ import pathlib
 class Extractor:
   def __init__(self):
     pass
-  def extract(source_file):
-    extracted_strings = code_to_dict(source_file)
-    dict_to_ts(extracted_strings, source_file)
+  def extract(param):
+  # if the function param is a file :
+    if os.path.isfile(param):
+      extracted_strings = code_to_dict(param)
+      dict_to_ts(extracted_strings, param)
+    # if the function param is a folder
+    elif os.path.isdir(param):
+    #1. get all .py file
+      py_files = get_all_py_file(param)
+    #2. use code_to_dict function and get a big dictionnary
+      big_dict = dict()
+      for py_file in py_files:
+        file_dict = code_to_dict(py_file)
+        big_dict[py_file] = file_dict
+      dict_to_ts(big_dict, "DataProbe.py")
+
   
 def walk (node):    
   """ast.walk() skips the order, just walks, so tracing is not possible with it."""
@@ -62,27 +75,51 @@ def code_to_dict(source_file):
   return words_table
 
 def dict_to_ts(dico, source_file):
-  context_name = get_context(source_file)
-  tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
-      <!DOCTYPE TS>
-      <TS version="2.1">
-        <context>
-          <name>"""+context_name+"""</name>"""
-  tsfile_end_template = """
-        </context>
-      </TS>"""
-  with open(context_name+".ts", "w") as f:
-    f.write(tsfile_start_template)
-    for msg in dico.values():
-      for msg_item in msg:
-        message_template = """
-          <message>
-              <location filename='"""+msg_item['filename']+"""' line='"""+str(msg_item['line'])+"""'/>
-              <source>"""+msg_item['source']+"""</source>
-              <translation type="unfinished">"""+"""</translation>
-          </message>"""
-        f.write(message_template)
-    f.write(tsfile_end_template)
+  if not isitbig(dico):
+    context_name = get_context(source_file)
+    tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
+        <!DOCTYPE TS>
+        <TS version="2.1">
+          <context>
+            <name>"""+context_name+"""</name>"""
+    tsfile_end_template = """
+          </context>
+        </TS>"""
+    with open(context_name+".ts", "w") as f:
+      f.write(tsfile_start_template)
+      for msg in dico.values():
+        for msg_item in msg:
+          message_template = """
+            <message>
+                <location filename='"""+msg_item['filename']+"""' line='"""+str(msg_item['line'])+"""'/>
+                <source>"""+msg_item['source']+"""</source>
+                <translation type="unfinished">"""+"""</translation>
+            </message>"""
+          f.write(message_template)
+      f.write(tsfile_end_template)
+  else:
+    context_name = get_context(source_file)
+    tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
+        <!DOCTYPE TS>
+        <TS version="2.1">
+          <context>
+            <name>"""+context_name+"""</name>"""
+    tsfile_end_template = """
+          </context>
+        </TS>"""
+    with open(context_name+".ts", "w") as f:
+      f.write(tsfile_start_template)
+      for minidict in dico.values():
+        for msg in minidict.values():
+          for msg_item in msg:
+            message_template = """
+              <message>
+                  <location filename='"""+msg_item['filename']+"""' line='"""+str(msg_item['line'])+"""'/>
+                  <source>"""+msg_item['source']+"""</source>
+                  <translation type="unfinished">"""+"""</translation>
+              </message>"""
+            f.write(message_template)
+      f.write(tsfile_end_template)
   
 def ts_to_dict(tsfile):
   document = minidom.parse(tsfile)
@@ -122,3 +159,18 @@ def get_context(source_file):
     if len(classes)!=0: context_name = package_name+"."+classes[0]
     else: context_name = source_file[:-3]
   return context_name
+
+def get_all_py_file(folder):
+  all_py_files = list()
+  for dirpath, dirnames, filenames in os.walk(folder):
+    for filename in [f for f in filenames if f.endswith(".py")]:
+      f = os.path.join(dirpath, filename)
+      all_py_files.append(f)
+  return all_py_files 
+
+def isitbig(dico):
+  for i in dico.values():
+    if isinstance(i, dict):
+      return True
+    else:
+      return False
