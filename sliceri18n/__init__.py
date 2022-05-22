@@ -75,16 +75,16 @@ def code_to_dict(source_file):
   return words_table
 
 def dict_to_ts(dico, source_file):
+  context_name = get_context(source_file)
+  tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
+      <!DOCTYPE TS>
+      <TS version="2.1">
+        <context>
+          <name>"""+context_name+"""</name>"""
+  tsfile_end_template = """
+        </context>
+      </TS>"""
   if not isitbig(dico):
-    context_name = get_context(source_file)
-    tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
-        <!DOCTYPE TS>
-        <TS version="2.1">
-          <context>
-            <name>"""+context_name+"""</name>"""
-    tsfile_end_template = """
-          </context>
-        </TS>"""
     with open(context_name+".ts", "w") as f:
       f.write(tsfile_start_template)
       for msg in dico.values():
@@ -98,15 +98,6 @@ def dict_to_ts(dico, source_file):
           f.write(message_template)
       f.write(tsfile_end_template)
   else:
-    context_name = get_context(source_file)
-    tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
-        <!DOCTYPE TS>
-        <TS version="2.1">
-          <context>
-            <name>"""+context_name+"""</name>"""
-    tsfile_end_template = """
-          </context>
-        </TS>"""
     with open(context_name+".ts", "w") as f:
       f.write(tsfile_start_template)
       for minidict in dico.values():
