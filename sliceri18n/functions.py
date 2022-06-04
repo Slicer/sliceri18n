@@ -54,7 +54,7 @@ def dict_to_ts(dico, source_file):
   tsfile_end_template = """
         </context>
       </TS>"""
-  if not isitbig(dico):
+  if not is_big(dico):
     with open(context_name+".ts", "w") as f:
       f.write(tsfile_start_template)
       for msg in dico.values():
@@ -129,7 +129,7 @@ def get_all_py_file(folder):
       all_py_files.append(f)
   return all_py_files 
 
-def isitbig(dico):
+def is_big(dico):
   for i in dico.values():
     if isinstance(i, dict):
       return True
@@ -140,20 +140,40 @@ def extraction_result(dico, source_file):
   context_name = get_context(source_file)
   tsfile = context_name+".ts"
   current_length = dict_values_length(dico)
+  current_val = getValues(dico)
+  added = 0
+  deleted = 0
   if os.path.exists(tsfile):
     previous_dict = ts_to_dict(tsfile)
     previous_length = dict_values_length(previous_dict)
-    added = 0
-    deleted = 0
+    old_val = getValues(previous_dict)
     if previous_length > current_length:
       deleted = previous_length - current_length
-      print(deleted," string(s) is deleted")
-    else:
+    elif previous_length < current_length:
       added = current_length - previous_length
-    print(added," new string(s)")
+    else:
+      for val in old_val:
+        if not val in current_val:
+          deleted+=1
+      for val in current_val:
+        if not val in old_val:
+          added+=1
+    print(added," new string(s)\n", deleted, "string(s) deleted")
+    print("total : ", current_length, "string(s)")
   else : 
     added = current_length
     print(added," new string(s)")
+
+def getValues(dico):
+  val_liste = []
+  if not is_big(dico):
+    for val in dico.values():
+      val_liste+=[item for item in val]
+  else:
+    for minidico in dico.values():
+      for val in minidico.values():
+        val_liste+=[item for item in val]
+  return val_liste
 
 def walk (node):    
     """ast.walk() skips the order, just walks, so tracing is not possible with it."""

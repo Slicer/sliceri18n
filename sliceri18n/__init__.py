@@ -1,6 +1,4 @@
-import ast
 import os
-import pathlib
 from .functions import * 
 
 class Extractor:
@@ -19,7 +17,11 @@ class Extractor:
     #2. use code_to_dict function and get a big dictionnary
       big_dict = dict()
       for py_file in py_files:
-        file_dict = code_to_dict(py_file)
-        big_dict[py_file] = file_dict
+        try:
+          file_dict = code_to_dict(py_file)
+          big_dict[py_file] = file_dict
+        except Exception as e:
+          print("error in extracting file : ",py_file)
+          print("\t[–] error : ", e)
       extraction_result(extracted_strings, "testfile.py")
       dict_to_ts(big_dict, "testfile.py")
