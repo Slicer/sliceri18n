@@ -108,17 +108,25 @@ def ts_to_dict(tsfile):
 
 def dict_values_length(dico):
   longueur=0
-  for values in dico.values(): longueur+=len(values)
+  if not is_big(dico):
+    for values in dico.values(): longueur+=len(values)
+  else :
+    for minidict in dico.values():
+      for values in minidict.values(): longueur+=len(values)
   return longueur
 
 def get_context(source_file):
-  with open(source_file, "r") as code:
-    tree = ast.parse(code.read())
-    classes = [node.name for node in walk(tree) if isinstance(node, ast.ClassDef)]
-    path = pathlib.PurePath(os.path.realpath(source_file))
-    package_name = str(path.parent.name)
-    if len(classes)!=0: context_name = package_name+"."+classes[0]
-    else: context_name = source_file[:-3]
+  context_name = ""
+  if os.path.isfile(source_file):
+    with open(source_file, "r") as code:
+      tree = ast.parse(code.read())
+      classes = [node.name for node in walk(tree) if isinstance(node, ast.ClassDef)]
+      path = pathlib.PurePath(os.path.realpath(source_file))
+      package_name = str(path.parent.name)
+      if len(classes)!=0: context_name = package_name+"."+classes[0]
+      else: context_name = source_file[:-3]
+  elif os.path.isdir(source_file):
+    context_name = source_file
   return context_name
 
 def get_all_py_file(folder):
@@ -160,7 +168,7 @@ def extraction_result(dico, source_file):
           added+=1
     print(added," new string(s)\n", deleted, "string(s) deleted")
     print("total : ", current_length, "string(s)")
-  else : 
+  else : # .ts file not already exist
     added = current_length
     print(added," new string(s)")
 
