@@ -6,6 +6,8 @@ class Extractor:
     pass
   def extract(param):
     context_name = get_context(param)
+    """ extraction is doing on a .py file or 
+        on a folder that contain .py files"""
     if os.path.isfile(param): # if the function param is a file
       extracted_strings = code_to_dict(param)
       extraction_result(extracted_strings, context_name)

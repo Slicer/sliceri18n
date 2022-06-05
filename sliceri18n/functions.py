@@ -5,6 +5,8 @@ import pathlib
 
   
 def code_to_dict(source_file):
+  """ Transform source code (extracted strings, line numbers,  location) 
+  to dictionnary after parsing it with ast module. """
   words_table = dict()
   with open(source_file, "r") as code:
     tree = ast.parse(code.read())
@@ -45,6 +47,9 @@ def code_to_dict(source_file):
   return words_table
 
 def dict_to_ts(dico, source_file):
+  """ generate .ts file contaning extracted strings 
+  with the resultant dictionary
+  """
   context_name = get_context(source_file)
   tsfile_start_template = """<?xml version="1.0" encoding="utf-8"?>
       <!DOCTYPE TS>
@@ -83,6 +88,7 @@ def dict_to_ts(dico, source_file):
       f.write(tsfile_end_template)
 
 def ts_to_dict(tsfile):
+  """ transform .ts file containing extracted strings to a dictionnary"""
   document = minidom.parse(tsfile)
   messages = document.getElementsByTagName('message')
   words_table = dict()
@@ -107,6 +113,7 @@ def ts_to_dict(tsfile):
   return words_table
 
 def dict_values_length(dico):
+  """ get dictionnary values length (values are lists)"""
   longueur=0
   if not is_big(dico):
     for values in dico.values(): longueur+=len(values)
@@ -116,6 +123,7 @@ def dict_values_length(dico):
   return longueur
 
 def get_context(source_file):
+  """ get context name based on source code file/folder"""
   context_name = ""
   if os.path.isfile(source_file):
     with open(source_file, "r") as code:
@@ -130,6 +138,7 @@ def get_context(source_file):
   return context_name
 
 def get_all_py_file(folder):
+  """get all .py file in a folder"""
   all_py_files = list()
   for dirpath, dirnames, filenames in os.walk(folder):
     for filename in [f for f in filenames if f.endswith(".py")]:
@@ -138,6 +147,8 @@ def get_all_py_file(folder):
   return all_py_files 
 
 def is_big(dico):
+  """ verify if the parameter is a big dictionnary 
+  (when the dictionnary values is other dictionnaries) or not"""
   for i in dico.values():
     if isinstance(i, dict):
       return True
@@ -145,6 +156,8 @@ def is_big(dico):
       return False
 
 def extraction_result(dico, source_file):
+  """show the extraction results 
+  (number of extracted strings, deleted strings, new added strings)"""
   context_name = get_context(source_file)
   tsfile = context_name+".ts"
   current_length = dict_values_length(dico)
@@ -173,6 +186,7 @@ def extraction_result(dico, source_file):
     print(added," new string(s)")
 
 def getValues(dico):
+  """ get dictionary values"""
   val_liste = []
   if not is_big(dico):
     for val in dico.values():
