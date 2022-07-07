@@ -155,10 +155,9 @@ def is_big(dico):
     else:
       return False
 
-def extraction_result(dico, source_file):
+def extraction_result(dico, context_name):
   """show the extraction results 
   (number of extracted strings, deleted strings, new added strings)"""
-  context_name = get_context(source_file)
   tsfile = context_name+".ts"
   current_length = dict_values_length(dico)
   current_val = getValues(dico)

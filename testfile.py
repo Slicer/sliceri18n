@@ -726,3 +726,4 @@ class DICOMLoadableTable(qt.QTableWidget):
       self.loadables[row].selected = (item.checkState() != 0)
       # updating the names
       self.loadables[row].name = item.text()
+print(_("Oumar"))
